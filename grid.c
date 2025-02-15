@@ -1,0 +1,72 @@
+#include "grid.h"
+#include "SDL2/SDL.h"
+#include <SDL2/SDL_ttf.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+extern int numbers[GRID_SIZE][GRID_SIZE];  // Deklaration des externen Arrays
+
+static int initialized = 0;
+
+// Vorwärtsdeklaration der Funktion renderText
+void renderText(SDL_Renderer* renderer, const char* text, int x, int y, TTF_Font* font);
+
+// Funktion zum Zeichnen des 8x8 Rasters
+void drawGrid(SDL_Renderer* renderer) {
+    SDL_SetRenderDrawColor(renderer, 169, 169, 169, 255);  // Grau
+
+    // Gitter zeichnen
+    for (int row = 0; row < GRID_SIZE; row++) {
+        for (int col = 0; col < GRID_SIZE; col++) {
+            SDL_Rect cell = {col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE};
+            SDL_RenderFillRect(renderer, &cell);
+        }
+    }
+}
+
+// Funktion zum Zeichnen des Rasters mit zufälligen Zahlen zwischen 0 und 9
+void drawGridWithNumbers(SDL_Renderer* renderer, TTF_Font* font, int selectedRow, int selectedCol) {
+    if (!initialized) {
+        // Initialisiere den Zufallszahlengenerator
+        srand(time(NULL));
+
+        // Zufällige Zahlen zwischen 0 und 9 generieren
+        for (int row = 0; row < GRID_SIZE; row++) {
+            for (int col = 0; col < GRID_SIZE; col++) {
+                numbers[row][col] = rand() % 10;
+            }
+        }
+        initialized = 1;
+    }
+
+    char numStr[3];  // String für Zahlen, Größe 3 für Nullterminierung
+
+    for (int row = 0; row < GRID_SIZE; row++) {
+        for (int col = 0; col < GRID_SIZE; col++) {
+            if (row == selectedRow && col == selectedCol) {
+                SDL_SetRenderDrawColor(renderer, 130, 130, 130, 255);  // Grau für ausgewählte Zelle
+            } else {
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // Weiß für normale Zellen
+            }
+            SDL_Rect cell = {col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE};
+            SDL_RenderFillRect(renderer, &cell);
+
+            // Zahl aus dem Array holen
+            snprintf(numStr, sizeof(numStr), "%d", numbers[row][col]);
+            renderText(renderer, numStr, col * CELL_SIZE + 20, row * CELL_SIZE + 20, font);
+        }
+    }
+}
+
+// Text rendern (muss auch hierher, weil es eine Hilfsfunktion für das Grid ist)
+void renderText(SDL_Renderer* renderer, const char* text, int x, int y, TTF_Font* font) {
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, text, (SDL_Color){0, 0, 0, 255});
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    
+    SDL_Rect textRect = {x, y, textSurface->w, textSurface->h};
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+}
