@@ -9,9 +9,6 @@ extern int numbers[GRID_SIZE][GRID_SIZE];  // Deklaration des externen Arrays
 
 static int initialized = 0;
 
-// Vorwärtsdeklaration der Funktion renderText
-void renderText(SDL_Renderer* renderer, const char* text, int x, int y, TTF_Font* font);
-
 // Funktion zum Zeichnen des 8x8 Rasters
 void drawGrid(SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 169, 169, 169, 255);  // Grau
@@ -57,16 +54,4 @@ void drawGridWithNumbers(SDL_Renderer* renderer, TTF_Font* font, int selectedRow
             renderText(renderer, numStr, col * CELL_SIZE + 20, row * CELL_SIZE + 20, font);
         }
     }
-}
-
-// Text rendern (muss auch hierher, weil es eine Hilfsfunktion für das Grid ist)
-void renderText(SDL_Renderer* renderer, const char* text, int x, int y, TTF_Font* font) {
-    SDL_Surface* textSurface = TTF_RenderText_Solid(font, text, (SDL_Color){0, 0, 0, 255});
-    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    
-    SDL_Rect textRect = {x, y, textSurface->w, textSurface->h};
-    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
-
-    SDL_FreeSurface(textSurface);
-    SDL_DestroyTexture(textTexture);
 }

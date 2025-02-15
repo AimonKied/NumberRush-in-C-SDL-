@@ -2,10 +2,13 @@
 #include "grid.h"
 #include "editmode.h"
 #include "calculationmode.h"
+#include "gui.h"
 
 extern int numbers[GRID_SIZE][GRID_SIZE];  // Deklaration des externen Arrays
 
 void handleEvents(SDL_Renderer* renderer, TTF_Font* font, int* quit, Mode* mode, int* selectedRow, int* selectedCol) {
+    static int sum = -1;  // Variable zur Speicherung der Summe
+
     SDL_Event e;
     while (SDL_PollEvent(&e) != 0) {
         if (e.type == SDL_QUIT) {
@@ -17,10 +20,12 @@ void handleEvents(SDL_Renderer* renderer, TTF_Font* font, int* quit, Mode* mode,
             // Check if the Edit Mode button is clicked
             if (x >= 600 && x <= 700 && y >= 10 && y <= 50) {
                 *mode = EDIT_MODE;
+                sum = -1;  // Summe zurücksetzen, wenn der Modus gewechselt wird
             }
             // Check if the Calculation Mode button is clicked
             else if (x >= 720 && x <= 820 && y >= 10 && y <= 50) {
                 *mode = CALCULATION_MODE;
+                sum = -1;  // Summe zurücksetzen, wenn der Modus gewechselt wird
             }
         }
 
@@ -31,8 +36,8 @@ void handleEvents(SDL_Renderer* renderer, TTF_Font* font, int* quit, Mode* mode,
         // Je nach Modus den entsprechenden Handler aufrufen
         if (*mode == EDIT_MODE) {
             handleEditMode(renderer, font, quit, selectedRow, selectedCol);
-        } else {
-            handleCalculationMode(renderer, font, quit);
+        } else if (*mode == CALCULATION_MODE) {
+            handleCalculationMode(renderer, font, quit, selectedRow, selectedCol, &sum);
         }    
 
         // Buttons zeichnen
